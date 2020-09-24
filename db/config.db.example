@@ -1,0 +1,13 @@
+{
+  "development": {
+    "url": "your db url",
+    "database": "your database name"
+  },
+  "production": {
+    "url": "your db url",
+    "database": "your database name"
+  }
+}
+
+// "this db use mongoo db
+// change this file into config.db.json"
