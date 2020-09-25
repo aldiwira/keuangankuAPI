@@ -7,6 +7,7 @@
   "author": "aldiwira<aldiwira.aw@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
@@ -24,6 +25,8 @@
     "nodemon": "^2.0.4"
   },
   "scripts": {
-    "dev": "set NODE_ENV=development&&nodemon index.js"
+    "start": "export NODE_ENV=production&&node index.js",
+    "devwin": "set NODE_ENV=development&&nodemon index.js",
+    "prodwin": "set NODE_ENV=production&&node index.js"
   }
 }
