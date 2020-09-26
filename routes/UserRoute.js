@@ -72,4 +72,22 @@ router.post('/login', async (req, res, next) => {
   }
 })
 
+router.put('/:idUser/edit', jwt.authToken, async (req, res, next) => {
+  const { username, email } = req.body
+  const { idUser } = req.params
+  try {
+    const filter = {
+      _id: idUser
+    }
+    const update = {
+      $set: { username, email }
+    }
+    await queryMDB.edit(clist.users, filter, update).then((datas) => {
+      res.status(200).json(response.set(200, 'Success change profil', datas))
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
 module.exports = router
