@@ -2,14 +2,15 @@ const express = require('express')
 const moment = require('moment')
 
 const queryMDB = require('../helper/queryMDB')
-const { sign, auth } = require('../helper/encrypt')
+const jwt = require('../helper/jwt')
+const encrypt = require('../helper/encrypt')
 const response = require('../helper/responses')
 const router = express.Router()
 const clist = queryMDB.cList
 
 router.post('/register', async (req, res, next) => {
-  let { username, email, password } = req.body
-  let cryptPass = await sign(password)
+  const { username, email, password } = req.body
+  const cryptPass = await encrypt.sign(password)
   try {
     const userData = await queryMDB.find(clist.users, {
       $or: [{ username: username }, { email: email }]
@@ -17,6 +18,7 @@ router.post('/register', async (req, res, next) => {
     if (userData) {
       throw new Error('User was available')
     } else {
+      const tokenJWT = await jwt.signToken(userData._id)
       await queryMDB
         .insert(clist.users, {
           username,
@@ -26,9 +28,12 @@ router.post('/register', async (req, res, next) => {
           updateAt: moment().format()
         })
         .then((datas) => {
-          res
-            .status(201)
-            .json(response.set(201, 'Success create new user', datas))
+          res.status(201).json(
+            response.set(201, 'Success create new user', {
+              userDatas: userData,
+              jwtToken: tokenJWT
+            })
+          )
         })
     }
   } catch (error) {
@@ -37,7 +42,7 @@ router.post('/register', async (req, res, next) => {
 })
 
 router.post('/login', async (req, res, next) => {
-  let { username, email, password } = req.body
+  const { username, email, password } = req.body
   try {
     const userData = await queryMDB.edit(
       clist.users,
@@ -47,16 +52,20 @@ router.post('/login', async (req, res, next) => {
       { $set: { updateAt: moment().format() } }
     )
     if (userData) {
-      const authPass = await auth(password, userData.cryptPass)
+      const authPass = await encrypt.auth(password, userData.cryptPass)
       if (authPass) {
-        res
-          .status(200)
-          .json(response.set(200, 'Success logged account', userData))
+        const tokenJWT = await jwt.signToken(userData._id)
+        res.status(200).json(
+          response.set(200, 'Success logged account', {
+            userDatas: userData,
+            jwtToken: tokenJWT
+          })
+        )
       } else {
-        throw new Error('Wrong password')
+        throw new Error('Wrong password account')
       }
     } else {
-      throw new Error('Wrong username or email and password')
+      throw new Error('Wrong username or email and password account')
     }
   } catch (error) {
     next(error)
