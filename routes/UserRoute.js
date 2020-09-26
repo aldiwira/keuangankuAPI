@@ -1,4 +1,5 @@
 const express = require('express')
+const moment = require('moment')
 
 const queryMDB = require('../helper/queryMDB')
 const { sign, auth } = require('../helper/encrypt')
@@ -17,7 +18,13 @@ router.post('/register', async (req, res, next) => {
       throw new Error('User was available')
     } else {
       await queryMDB
-        .insert(clist.users, { username, email, cryptPass })
+        .insert(clist.users, {
+          username,
+          email,
+          cryptPass,
+          createdAt: moment().format(),
+          updateAt: moment().format()
+        })
         .then((datas) => {
           res
             .status(201)
@@ -32,9 +39,13 @@ router.post('/register', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   let { username, email, password } = req.body
   try {
-    const userData = await queryMDB.find(clist.users, {
-      $or: [{ username: username }, { email: email }]
-    })
+    const userData = await queryMDB.edit(
+      clist.users,
+      {
+        $or: [{ username: username }, { email: email }]
+      },
+      { $set: { updateAt: moment().format() } }
+    )
     if (userData) {
       const authPass = await auth(password, userData.cryptPass)
       if (authPass) {
