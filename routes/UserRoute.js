@@ -23,7 +23,7 @@ router.post('/register', async (req, res, next) => {
         .insert(clist.users, {
           username,
           email,
-          cryptPass,
+          password: cryptPass,
           createdAt: moment().format(),
           updateAt: moment().format()
         })
@@ -52,7 +52,7 @@ router.post('/login', async (req, res, next) => {
       { $set: { updateAt: moment().format() } }
     )
     if (userData) {
-      const authPass = await encrypt.auth(password, userData.cryptPass)
+      const authPass = await encrypt.auth(password, userData.password)
       if (authPass) {
         const tokenJWT = await jwt.signToken(userData._id)
         res.status(200).json(
@@ -80,7 +80,7 @@ router.put('/:idUser/edit', jwt.authToken, async (req, res, next) => {
       _id: idUser
     }
     const update = {
-      $set: { username, email }
+      $set: { username, email, updateAt: moment().format() }
     }
     await queryMDB.edit(clist.users, filter, update).then((datas) => {
       res.status(200).json(response.set(200, 'Success change profil', datas))
@@ -89,5 +89,50 @@ router.put('/:idUser/edit', jwt.authToken, async (req, res, next) => {
     next(error)
   }
 })
+
+router.post(
+  '/:idUser/changePassword',
+  jwt.authToken,
+  async (req, res, next) => {
+    const { oldPassword, newPassword } = req.body
+    const { idUser } = req.params
+    try {
+      const userDatas = await queryMDB.find(clist.users, {
+        _id: idUser
+      })
+      if (userDatas) {
+        const checkPass = await encrypt.auth(oldPassword, userDatas.password)
+        if (checkPass) {
+          const newCryptedPass = await encrypt.sign(newPassword)
+          await queryMDB
+            .edit(
+              clist.users,
+              { _id: idUser },
+              {
+                $set: {
+                  _id: idUser,
+                  password: newCryptedPass,
+                  updateAt: moment().format()
+                }
+              }
+            )
+            .then((datas) => {
+              res
+                .status(200)
+                .json(
+                  response.set(200, 'Success change password account', datas)
+                )
+            })
+        } else {
+          throw new Error('Wrong old password account')
+        }
+      } else {
+        throw new Error('User ID not found')
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 module.exports = router
