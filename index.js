@@ -4,6 +4,7 @@ const pjson = require('./package.json')
 const helmet = require('helmet')
 const cors = require('cors')
 const { db } = require('./db')
+const { userRoute } = require('./routes')
 
 const app = express()
 const port = 3000 || process.env.port
@@ -12,6 +13,7 @@ const envStat = process.env.NODE_ENV
 //middleware
 app.use(helmet())
 app.use(cors())
+app.use(express.json())
 app.get('/', async (req, res) => {
   const AppTest = {
     App: `${pjson.name}`,
@@ -20,7 +22,9 @@ app.get('/', async (req, res) => {
   res.json(AppTest)
 })
 
-app.use(async (error, req, res, next) => {
+app.use('/users', userRoute)
+
+app.use((error, req, res, next) => {
   if (error.status) {
     res.status(error.status)
   } else {

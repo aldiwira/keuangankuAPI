@@ -24,5 +24,8 @@ module.exports = {
   delete: (collection, filter) => {
     const col = findCollection(collection)
     return col.findOneAndDelete(filter)
+  },
+  cList: {
+    users: 'users'
   }
 }
