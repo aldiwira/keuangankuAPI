@@ -26,6 +26,7 @@ module.exports = {
     return col.findOneAndDelete(filter)
   },
   cList: {
-    users: 'users'
+    users: 'users',
+    notes: 'notes'
   }
 }

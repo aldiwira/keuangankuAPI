@@ -4,7 +4,7 @@ const pjson = require('./package.json')
 const helmet = require('helmet')
 const cors = require('cors')
 const { db } = require('./db')
-const { userRoute } = require('./routes')
+const { userRoute, noteRoute } = require('./routes')
 
 const app = express()
 const port = 3000 || process.env.port
@@ -23,6 +23,7 @@ app.get('/', async (req, res) => {
 })
 
 app.use('/users', userRoute)
+app.use('/notes', noteRoute)
 
 app.use((error, req, res, next) => {
   if (error.status) {
@@ -33,7 +34,7 @@ app.use((error, req, res, next) => {
   res.json({
     code: error.status ? error.status : 500,
     message: error.message,
-    data: error.stack
+    data: false
   })
 })
 

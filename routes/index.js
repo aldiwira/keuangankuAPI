@@ -1,3 +1,4 @@
 const userRoute = require('./UserRoute')
+const noteRoute = require('./NoteRoute')
 
-module.exports = { userRoute }
+module.exports = { userRoute, noteRoute }
