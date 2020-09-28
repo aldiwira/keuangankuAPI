@@ -25,4 +25,33 @@ router.get('/:idUser/', jwt.authToken, async (req, res, next) => {
   }
 })
 
+router.post('/:idUser/initial', jwt.authToken, async (req, res, next) => {
+  const { _id } = req.payload
+  const { idUser } = req.params
+  try {
+    const bodyNotes = {
+      userID: _id,
+      noteDatas: [],
+      createdAt: dateNow,
+      updatedAt: dateNow
+    }
+    if (idUser === _id) {
+      const available = await queryMDB.find(clist.notes, { userID: _id })
+      if (available) {
+        throw new Error('Notes was available')
+      } else {
+        await queryMDB.insert(clist.notes, bodyNotes).then((datas) => {
+          res
+            .status(201)
+            .json(response.set(201, 'Success create initial notes', datas))
+        })
+      }
+    } else {
+      throw new Error('Unknown id with wrong token owner')
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 module.exports = router
