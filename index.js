@@ -29,10 +29,10 @@ app.use((error, req, res, next) => {
   if (error.status) {
     res.status(error.status)
   } else {
-    res.status(500)
+    res.status(400)
   }
   res.json({
-    code: error.status ? error.status : 500,
+    code: error.status ? error.status : 400,
     message: error.message,
     data: false
   })

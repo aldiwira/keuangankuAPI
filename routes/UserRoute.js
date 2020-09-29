@@ -83,7 +83,11 @@ router.put('/edit', jwt.authToken, async (req, res, next) => {
       $set: { username, email, updateAt: moment().format() }
     }
     await queryMDB.edit(clist.users, filter, update).then((datas) => {
-      res.status(200).json(response.set(200, 'Success change profil', datas))
+      if (datas) {
+        res.status(200).json(response.set(200, 'Success change profil', datas))
+      } else {
+        throw new Error('Failed unknown user id not found')
+      }
     })
   } catch (error) {
     next(error)
@@ -139,9 +143,13 @@ router.get('/', jwt.authToken, async (req, res, next) => {
         { $set: { updatedAt: moment().format() } }
       )
       .then((datas) => {
-        res
-          .status(200)
-          .json(response.set(200, 'Success fetch user data', datas))
+        if (datas) {
+          res
+            .status(200)
+            .json(response.set(200, 'Success fetch user data', datas))
+        } else {
+          throw new Error('Failed unknown user id not found')
+        }
       })
   } catch (error) {
     next(error)
