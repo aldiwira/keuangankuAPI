@@ -148,4 +148,23 @@ router.get('/', jwt.authToken, async (req, res, next) => {
   }
 })
 
+router.delete('/destroy', jwt.authToken, async (req, res, next) => {
+  const { _id } = req.payload
+  try {
+    const available = await queryMDB.find(clist.users, { _id: _id })
+    if (available) {
+      await queryMDB.delete(clist.notes, { userID: _id })
+      await queryMDB.delete(clist.users, { _id: _id }).then((datas) => {
+        res
+          .status(200)
+          .json(response.set(200, 'Success destory user data', false))
+      })
+    } else {
+      throw new Error('User and data not found')
+    }
+  } catch (err) {
+    next(err)
+  }
+})
+
 module.exports = router
