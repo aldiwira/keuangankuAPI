@@ -25,7 +25,7 @@ router.post('/register', async (req, res, next) => {
           email,
           password: cryptPass,
           createdAt: moment().format(),
-          updateAt: moment().format()
+          updatedAt: moment().format()
         })
         .then((datas) => {
           res.status(201).json(
@@ -49,7 +49,7 @@ router.post('/login', async (req, res, next) => {
       {
         $or: [{ username: username }, { email: email }]
       },
-      { $set: { updateAt: moment().format() } }
+      { $set: { updatedAt: moment().format() } }
     )
     if (userData) {
       const authPass = await encrypt.auth(password, userData.password)
@@ -109,7 +109,7 @@ router.post('/changePassword', jwt.authToken, async (req, res, next) => {
               $set: {
                 _id: _id,
                 password: newCryptedPass,
-                updateAt: moment().format()
+                updatedAt: moment().format()
               }
             }
           )
@@ -124,6 +124,25 @@ router.post('/changePassword', jwt.authToken, async (req, res, next) => {
     } else {
       throw new Error('User ID not found')
     }
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/', jwt.authToken, async (req, res, next) => {
+  const { _id } = req.payload
+  try {
+    await queryMDB
+      .edit(
+        clist.users,
+        { _id: _id },
+        { $set: { updatedAt: moment().format() } }
+      )
+      .then((datas) => {
+        res
+          .status(200)
+          .json(response.set(200, 'Success fetch user data', datas))
+      })
   } catch (error) {
     next(error)
   }

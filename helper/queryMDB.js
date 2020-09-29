@@ -5,25 +5,25 @@ const findCollection = (collection) => {
 }
 
 module.exports = {
-  insert: (collection, datas) => {
-    const col = findCollection(collection)
-    return col.insert(datas)
+  insert: async (collection, datas) => {
+    const col = await findCollection(collection)
+    return await col.insert(datas)
   },
-  find: (collection, filter) => {
-    const col = findCollection(collection)
+  find: async (collection, filter) => {
+    const col = await findCollection(collection)
     if (filter) {
-      return col.findOne(filter)
+      return await col.findOne(filter)
     } else {
-      return col.find()
+      return await col.find()
     }
   },
-  edit: (collection, filter, update) => {
-    const col = findCollection(collection)
-    return col.findOneAndUpdate(filter, update)
+  edit: async (collection, filter, update) => {
+    const col = await findCollection(collection)
+    return await col.findOneAndUpdate(filter, update)
   },
-  delete: (collection, filter) => {
-    const col = findCollection(collection)
-    return col.findOneAndDelete(filter)
+  delete: async (collection, filter) => {
+    const col = await findCollection(collection)
+    return await col.findOneAndDelete(filter)
   },
   cList: {
     users: 'users',
