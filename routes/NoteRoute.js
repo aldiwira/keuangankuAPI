@@ -54,4 +54,27 @@ router.post('/:idUser/initial', jwt.authToken, async (req, res, next) => {
   }
 })
 
+router.post('/:idUser/sync', jwt.authToken, async (req, res, next) => {
+  const { _id } = req.params
+  const { idUser } = req.payload
+  const { noteDatas } = req.body
+  try {
+    if (_id === idUser) {
+      throw new Error('Unknown id with wrong token owner')
+    } else {
+      await queryMDB
+        .edit(
+          clist.notes,
+          { userID: _id },
+          { $set: { noteDatas: noteDatas, updatedAt: dateNow } }
+        )
+        .then((datas) => {
+          res.status(200).json(response.set(200, 'Success sync data', datas))
+        })
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 module.exports = router
